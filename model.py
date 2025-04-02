@@ -6,8 +6,8 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from xgboost import XGBRegressor
-from sklearn.metrics import mean_squared_error, r2_score
-import joblib
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+import matplotlib.pyplot as plt
 
 # 1. Cargar datasets
 df_incendios = pd.read_csv('BD.csv', encoding='ISO-8859-1', low_memory=False)
@@ -124,8 +124,30 @@ y_test_orig = np.expm1(y_test)
 y_pred_orig = np.expm1(y_pred)
 
 mse = mean_squared_error(y_test_orig, y_pred_orig)
+rmse = np.sqrt(mse)
+mae = mean_absolute_error(y_test_orig, y_pred_orig)
 r2 = r2_score(y_test_orig, y_pred_orig)
 
-print(f'MSE: {mse}')
-print(f'R²: {r2}')
+plt.figure(figsize=(8,6))
+plt.scatter(y_test, y_pred, alpha=0.5, label='Datos')
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2, label='Línea Ideal')
+plt.xlabel('Valores Reales')
+plt.ylabel('Predicciones')
+plt.title('Predicciones vs. Valores Reales')
+plt.legend()
+plt.show()
 
+# 2. Gráfico de Residuos: Residuos vs. Predicciones
+residuos = y_test - y_pred
+plt.figure(figsize=(8,6))
+plt.scatter(y_pred, residuos, alpha=0.5)
+plt.axhline(y=0, color='r', linestyle='--', lw=2)
+plt.xlabel('Predicciones')
+plt.ylabel('Residuos (Error)')
+plt.title('Gráfico de Residuos')
+plt.show()
+
+print(f"MSE: {mse:.2f}")
+print(f"RMSE: {rmse:.2f}")
+print(f"MAE: {mae:.2f}")
+print(f"R²: {r2:.2f}")
